@@ -1,0 +1,28 @@
+{% apply spaceless %}
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"{% if has_alternates %} xmlns:xhtml="http://www.w3.org/1999/xhtml"{% endif %}>
+    {% for item in sitemap_items %}
+        <url>
+            <loc>{{ item.loc }}</loc>
+
+            {% if item.alternates|length > 0 %}
+                {% for alternate in item.alternates %}
+                    <xhtml:link rel="alternate" hreflang="{{ alternate.hrefLang }}" href="{{ alternate.href }}"/>
+                {% endfor %}
+            {% else %}
+                {% if item.priority is not null %}
+                    <priority>{{ item.priority|number_format(2) }}</priority>
+                {% endif %}
+
+                {% if item.changeFrequency is not null %}
+                    <changefreq>{{ item.changeFrequency }}</changefreq>
+                {% endif %}
+
+                {% if item.modificationDate is not null %}
+                    <lastmod>{{ item.modificationDate|date('Y-m-d') }}</lastmod>
+                {% endif %}
+            {% endif %}
+        </url>
+    {% endfor %}
+</urlset>
+{% endapply %}

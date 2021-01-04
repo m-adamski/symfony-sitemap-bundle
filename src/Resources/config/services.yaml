@@ -1,0 +1,20 @@
+services:
+    sitemap_bundle.helper.sitemap:
+        class: Adamski\Symfony\SitemapBundle\Helper\SitemapHelper
+        arguments:
+            - '@router'
+            - '@Adamski\Symfony\SitemapBundle\Model\SitemapGeneratorInterface'
+
+    sitemap_bundle.controller.sitemap:
+        class: Adamski\Symfony\SitemapBundle\Controller\SitemapController
+        arguments:
+            - '@sitemap_bundle.helper.sitemap'
+
+    Adamski\Symfony\SitemapBundle\Controller\SitemapController:
+        alias: sitemap_bundle.controller.sitemap
+
+    Adamski\Symfony\SitemapBundle\Helper\SitemapHelper:
+        alias: sitemap_bundle.helper.sitemap
+
+    Adamski\Symfony\SitemapBundle\Model\SitemapGeneratorInterface:
+        alias: sitemap_bundle.model.sitemap_generator

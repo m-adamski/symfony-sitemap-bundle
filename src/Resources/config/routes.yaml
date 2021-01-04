@@ -1,0 +1,4 @@
+sitemap:
+    path: /sitemap.xml
+    methods: [ GET ]
+    controller: Adamski\Symfony\SitemapBundle\Controller\SitemapController::generate

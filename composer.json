@@ -1,0 +1,34 @@
+{
+    "name": "m-adamski/symfony-sitemap-bundle",
+    "description": "Sitemap Bundle for Symfony",
+    "type": "symfony-bundle",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Maciej Adamski",
+            "email": "m.adamski@ideacode.pl"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": "^7.2",
+        "symfony/framework-bundle": "^5.0"
+    },
+    "require-dev": {
+        "kint-php/kint": "^3.3",
+        "symfony/phpunit-bridge": "^5.0"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "autoload": {
+        "psr-4": {
+            "Adamski\\Symfony\\SitemapBundle\\": "src/"
+        }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    }
+}
