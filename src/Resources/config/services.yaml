@@ -2,19 +2,22 @@ services:
     sitemap_bundle.helper.sitemap:
         class: Adamski\Symfony\SitemapBundle\Helper\SitemapHelper
         arguments:
+            - '@service_container'
             - '@router'
-            - '@Adamski\Symfony\SitemapBundle\Model\SitemapGeneratorInterface'
 
     sitemap_bundle.controller.sitemap:
         class: Adamski\Symfony\SitemapBundle\Controller\SitemapController
         arguments:
             - '@sitemap_bundle.helper.sitemap'
-
-    Adamski\Symfony\SitemapBundle\Controller\SitemapController:
-        alias: sitemap_bundle.controller.sitemap
+        tags:
+            - { name: controller.service_arguments }
+        calls:
+            - [ setContainer, [ '@service_container' ] ]
+        public: true
 
     Adamski\Symfony\SitemapBundle\Helper\SitemapHelper:
         alias: sitemap_bundle.helper.sitemap
 
-    Adamski\Symfony\SitemapBundle\Model\SitemapGeneratorInterface:
-        alias: sitemap_bundle.model.sitemap_generator
+    Adamski\Symfony\SitemapBundle\Controller\SitemapController:
+        alias: sitemap_bundle.controller.sitemap
+        public: true

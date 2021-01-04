@@ -7,6 +7,7 @@ use Adamski\Symfony\SitemapBundle\Model\SitemapGeneratorInterface;
 use Adamski\Symfony\SitemapBundle\Model\SitemapItem;
 use Adamski\Symfony\SitemapBundle\Model\SitemapItemAlternate;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\Route;
 use Symfony\Component\Routing\RouteCollection;
 use Symfony\Component\Routing\Router;
@@ -18,7 +19,7 @@ class SitemapHelperTest extends TestCase {
      */
     public function testSimpleSitemap() {
         $routerStub = $this->createMock(Router::class);
-        $sitemapGeneratorStub = $this->createMock(SitemapGeneratorInterface::class);
+        $containerStub = $this->createMock(ContainerInterface::class);
 
         // Generate Route Collection
         $routeCollection = new RouteCollection();
@@ -33,7 +34,7 @@ class SitemapHelperTest extends TestCase {
             ->willReturnOnConsecutiveCalls("/", "/home", "/other");
 
         // Create instance of the Sitemap Helper
-        $sitemapHelper = new SitemapHelper($routerStub, $sitemapGeneratorStub);
+        $sitemapHelper = new SitemapHelper($containerStub, $routerStub);
         $sitemapItems = $sitemapHelper->getSitemapItems();
 
         // Generate expected result
@@ -48,7 +49,7 @@ class SitemapHelperTest extends TestCase {
      */
     public function testLocaleSitemap() {
         $routerStub = $this->createMock(Router::class);
-        $sitemapGeneratorStub = $this->createMock(SitemapGeneratorInterface::class);
+        $containerStub = $this->createMock(ContainerInterface::class);
 
         // Generate Route Collection
         $routeCollection = new RouteCollection();
@@ -61,7 +62,7 @@ class SitemapHelperTest extends TestCase {
         });
 
         // Create instance of the Sitemap Helper
-        $sitemapHelper = new SitemapHelper($routerStub, $sitemapGeneratorStub);
+        $sitemapHelper = new SitemapHelper($containerStub, $routerStub);
         $sitemapItems = $sitemapHelper->getSitemapItems();
 
         // Generate expected result
@@ -87,21 +88,23 @@ class SitemapHelperTest extends TestCase {
      */
     public function testGeneratedSitemap() {
         $routerStub = $this->createMock(Router::class);
+        $containerStub = $this->createMock(ContainerInterface::class);
         $sitemapGeneratorStub = $this->getMockBuilder(SitemapGeneratorInterface::class)->addMethods(["generateName"])->getMock();
 
         // Generate Route Collection
         $routeCollection = new RouteCollection();
-        $routeCollection->add("name", new Route("/name/{name}", ["_sitemap" => ["generation_method" => "generateName"]]));
+        $routeCollection->add("name", new Route("/name/{name}", ["_sitemap" => ["generator" => "SitemapGeneratorInterface::generateName"]]));
 
         // Configure Stubs
         $sitemapGeneratorStub->method("generateName")->willReturn([["name" => "Susan"], ["name" => "Matt"]]);
+        $containerStub->method("get")->willReturn($sitemapGeneratorStub);
         $routerStub->method("getRouteCollection")->willReturn($routeCollection);
         $routerStub->method("generate")->willReturnCallback(function (string $name, array $parameters) {
             return $parameters["name"] === "Susan" ? "/name/Susan" : "/name/Matt";
         });
 
         // Create instance of the Sitemap Helper
-        $sitemapHelper = new SitemapHelper($routerStub, $sitemapGeneratorStub);
+        $sitemapHelper = new SitemapHelper($containerStub, $routerStub);
         $sitemapItems = $sitemapHelper->getSitemapItems();
 
         // Generate expected result

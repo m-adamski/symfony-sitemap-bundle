@@ -5,9 +5,15 @@ namespace Adamski\Symfony\SitemapBundle\Helper;
 use Adamski\Symfony\SitemapBundle\Model\SitemapGeneratorInterface;
 use Adamski\Symfony\SitemapBundle\Model\SitemapItem;
 use Adamski\Symfony\SitemapBundle\Model\SitemapItemAlternate;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\RouterInterface;
 
 class SitemapHelper {
+
+    /**
+     * @var ContainerInterface
+     */
+    protected $container;
 
     /**
      * @var RouterInterface
@@ -15,19 +21,14 @@ class SitemapHelper {
     protected $router;
 
     /**
-     * @var SitemapGeneratorInterface
-     */
-    protected $sitemapGenerator;
-
-    /**
      * SitemapHelper constructor.
      *
-     * @param RouterInterface           $router
-     * @param SitemapGeneratorInterface $sitemapGenerator
+     * @param ContainerInterface $container
+     * @param RouterInterface    $router
      */
-    public function __construct(RouterInterface $router, SitemapGeneratorInterface $sitemapGenerator) {
+    public function __construct(ContainerInterface $container, RouterInterface $router) {
+        $this->container = $container;
         $this->router = $router;
-        $this->sitemapGenerator = $sitemapGenerator;
     }
 
     /**
@@ -78,22 +79,28 @@ class SitemapHelper {
             $itemModificationDate = $this->getValue($sitemapConf, "last_modification");
             $itemModificationDate = null !== $itemModificationDate ? new \DateTime($itemModificationDate) : null;
 
-            if (null !== $generationMethod = $this->getValue($sitemapConf, "generation_method")) {
-                if (is_callable([$this->sitemapGenerator, $generationMethod])) {
-                    $generationResult = $this->sitemapGenerator->{$generationMethod}();
+            if (null !== $generatorConf = $this->getValue($sitemapConf, "generator")) {
+                list($genClass, $genMethod) = explode("::", $generatorConf);
 
-                    if (is_array($generationResult) && count($generationResult) > 0) {
-                        return array_map(function (array $payload) use ($canonicalRoute, $locale, $itemPriority, $itemChangeFrequency, $itemModificationDate) {
-                            $parameters = array_merge($payload, null !== $locale ? ["_locale" => $locale] : []);
+                if (null !== ($generator = $this->container->get($genClass))) {
+                    if ($generator instanceof SitemapGeneratorInterface) {
+                        if (is_callable([$generator, $genMethod])) {
+                            $generationResult = $generator->{$genMethod}();
 
-                            return new SitemapItem(
-                                $this->generateUrl($canonicalRoute, $parameters),
-                                $itemPriority,
-                                $itemChangeFrequency,
-                                $itemModificationDate,
-                                $payload
-                            );
-                        }, $generationResult);
+                            if (is_array($generationResult) && count($generationResult) > 0) {
+                                return array_map(function (array $payload) use ($canonicalRoute, $locale, $itemPriority, $itemChangeFrequency, $itemModificationDate) {
+                                    $parameters = array_merge($payload, null !== $locale ? ["_locale" => $locale] : []);
+
+                                    return new SitemapItem(
+                                        $this->generateUrl($canonicalRoute, $parameters),
+                                        $itemPriority,
+                                        $itemChangeFrequency,
+                                        $itemModificationDate,
+                                        $payload
+                                    );
+                                }, $generationResult);
+                            }
+                        }
                     }
                 }
 
