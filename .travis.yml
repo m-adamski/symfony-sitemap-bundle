@@ -13,9 +13,6 @@ jobs:
     fast_finish: true
     include:
         -   php: 7.2
-            env: DEPENDENCIES="symfony/symfony:^4.1"
-
-        -   php: 7.2
             env: DEPENDENCIES="symfony/symfony:^5.0"
 
         -   php: 7.3
