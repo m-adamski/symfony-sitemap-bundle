@@ -84,6 +84,13 @@ class SitemapGenerator implements SitemapGeneratorInterface {
 }
 ```
 
+Important: The SitemapGenerator object must be marked as public in DI.
+
+```yaml
+App\Model\SitemapGenerator:
+    public: true
+```
+
 As the result there should be generated three additional items in sitemap file:
 
 ```xml
