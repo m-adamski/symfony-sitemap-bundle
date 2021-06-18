@@ -49,9 +49,13 @@ class SitemapHelper {
 
                     // Generate Sitemap Item
                     foreach ($this->generateItems($canonicalRoute, $sitemapRoute, $localeRoute) as $item) {
-                        $item->setAlternates(
-                            $this->generateAlternates($canonicalRoute, $item->getPayload())
-                        );
+                        $alternates = $this->generateAlternates($canonicalRoute, $item->getPayload());
+
+                        if (count($alternates) > 1) {
+                            $item->setAlternates(
+                                $this->generateAlternates($canonicalRoute, $item->getPayload())
+                            );
+                        }
 
                         $sitemapItems[] = $item;
                     }
